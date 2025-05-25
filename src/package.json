@@ -1,8 +1,8 @@
 {
-  "name": "edex-ui",
-  "productName": "eDEX-UI",
-  "version": "2.2.8",
-  "description": "eDEX-UI sci-fi interface",
+  "name": "xdex-ui",
+  "productName": "xDEX-UI",
+  "version": "3.0.0",
+  "description": "xDEX-UI sci-fi interface",
   "keywords": [
     "desktop",
     "sci-fi",
@@ -19,9 +19,9 @@
   "author": "Gabriel 'Squared' SAILLARD <gabriel@saillard.dev> (https://gaby.dev)",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/GitSquared/edex-ui/issues"
+    "url": "https://github.com/andreas-hartmann/xdex-ui/issues"
   },
-  "homepage": "https://github.com/GitSquared/edex-ui#readme",
+  "homepage": "https://github.com/andreas-hartmann/xdex-ui#readme",
   "dependencies": {
     "@electron/remote": "2.1.2",
     "augmented-ui": "^1.1.2",
