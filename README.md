@@ -100,7 +100,7 @@ Thanks! If you feel like it, you can [follow me on Twitter](https://gaby.dev/twi
 
 ## Useful commands for the nerds
 
-**IMPORTANT NOTE:** the following instructions are meant for running eDEX from the latest unoptimized, unreleased, development version. If you'd like to get stable software instead, refer to [these](#how-do-i-get-it) instructions.
+**IMPORTANT NOTE:** the following instructions are meant for running xDEX-UI from the latest unoptimized, unreleased, development version. If you'd like to get stable software instead, refer to [these](#how-do-i-get-it) instructions. As of today, only Linux is tested and supported.
 
 #### Starting from source:
 on *nix systems (You'll need the Xcode command line tools on macOS):
