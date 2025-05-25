@@ -14,7 +14,7 @@
   "main": "src/_boot.js",
   "scripts": {
     "start": "electron src --nointro",
-    "install-linux": "npm install && cd src && npm install && ./../node_modules/.bin/electron-rebuild -f -w node-pty && cd ..",
+    "install-linux": "npm install && cd src && npm install && ../node_modules/.bin/electron-rebuild -f -w node-pty -v 34.5.6 && cd ..",
     "preinstall-windows": "npm install --global --production windows-build-tools && npm install --global node-gyp && setx PYTHON \"%USERPROFILE%\\.windows-build-tools\\python27\\python.exe\"",
     "install-windows": "npm install && cd src && npm install && ..\\node_modules\\.bin\\electron-rebuild -f -w node-pty && cd ..",
     "prebuild-linux": "rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && cd prebuild-src && npm install",
@@ -28,7 +28,8 @@
     "postbuild-windows": "rmdir /S /Q prebuild-src",
     "test": "rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && cd prebuild-src && npm install && snyk test && cd .. && rm -R prebuild-src",
     "init-file-icons": "git submodule update --init",
-    "update-file-icons": "git submodule foreach git pull origin master && node file-icons-generator.js"
+    "update-file-icons": "git submodule foreach git pull origin master && node file-icons-generator.js",
+    "postinstall": "electron-rebuild"
   },
   "repository": {
     "type": "git",
