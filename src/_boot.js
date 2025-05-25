@@ -1,5 +1,6 @@
 const signale = require("signale");
 const {app, BrowserWindow, dialog, shell} = require("electron");
+const { enable } = require('@electron/remote/main');
 
 process.on("uncaughtException", e => {
     signale.fatal(e);
@@ -30,8 +31,11 @@ if (!gotLock) {
 signale.time("Startup");
 
 const electron = require("electron");
-require('@electron/remote/main').initialize()
+const remoteMain = require('@electron/remote/main')
+remoteMain.initialize();
+remoteMain.enable(electron.webContents);
 const ipc = electron.ipcMain;
+ipc.handle("get-cli-args", () => process.argv);
 const path = require("path");
 const url = require("url");
 const fs = require("fs");
@@ -87,8 +91,8 @@ if (!fs.existsSync(settingsFile)) {
         port: 3000,
         nointro: false,
         nocursor: false,
-        forceFullscreen: true,
-        allowWindowed: false,
+        forceFullscreen: false,
+        allowWindowed: true,
         excludeThreadsFromToplist: true,
         hideDotfiles: false,
         fsListView: false,
@@ -202,6 +206,8 @@ function createWindow(settings) {
             experimentalFeatures: settings.experimentalFeatures || false
         }
     });
+
+    enable(win.webContents);
 
     win.loadURL(url.format({
         pathname: path.join(__dirname, 'ui.html'),
