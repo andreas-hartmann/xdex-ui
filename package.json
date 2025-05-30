@@ -100,10 +100,10 @@
     }
   },
   "dependencies": {
+    "@electron/rebuild": "4.0.1",
     "clean-css": "5.3.3",
     "electron": "^36.3.2",
     "electron-builder": "^26.0.12",
-    "@electron/rebuild": "4.0.1",
     "mime-types": "^3.0.1",
     "node-abi": "4.9.0",
     "node-json-minify": "3.0.0",
@@ -111,5 +111,8 @@
   },
   "optionalDependencies": {
     "cson-parser": "4.0.9"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^3.2.9"
   }
 }
