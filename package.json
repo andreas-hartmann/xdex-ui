@@ -107,7 +107,7 @@
     "mime-types": "^3.0.1",
     "node-abi": "4.9.0",
     "node-json-minify": "3.0.0",
-    "terser": "5.40.0"
+    "terser": "5.42.0"
   },
   "optionalDependencies": {
     "cson-parser": "4.0.9"
