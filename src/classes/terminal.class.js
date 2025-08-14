@@ -1,7 +1,3 @@
-const crypto = require("crypto");
-
-const TOKEN_SECRET = crypto.randomBytes(32).toString("hex");
-
 class Terminal {
     constructor(opts) {
         if (opts.role === "client") {
@@ -154,6 +150,50 @@ class Terminal {
             this.Ipc.send("terminal_channel-"+this.port, "Renderer startup");
             this.Ipc.on("terminal_channel-"+this.port, (e, ...args) => {
                 switch(args[0]) {
+                    case "Auth token": {
+                        const token = args[1];
+                        let sockHost = opts.host || "127.0.0.1";
+                        let sockPort = this.port;
+
+                        this.socket = new WebSocket(`ws://${sockHost}:${sockPort}/?token=${encodeURIComponent(token)}`);
+                        this.socket.onopen = () => {
+                            let attachAddon = new AttachAddon(this.socket);
+                            this.term.loadAddon(attachAddon);
+                            this.fit();
+                        };
+                        this.socket.onerror = (ev) => {
+                            console.error("WebSocket error", ev); // Step 1 improvement
+                        };
+                        this.socket.onclose = (ev) => {
+                            if (this.onclose) {
+                                this.onclose(ev);
+                            }
+                        };
+
+                        this.lastSoundFX = Date.now();
+                        this.socket.addEventListener("message", e => {
+                            let d = Date.now();
+
+                            if (d - this.lastSoundFX > 30) {
+                                if(window.passwordMode == "false")
+                                    window.audioManager.stdout.play();
+                                this.lastSoundFX = d;
+                            }
+                            if (d - this.lastRefit > 10000) {
+                                this.fit();
+                            }
+                            // See #397
+                            if (!window.settings.experimentalGlobeFeatures) return;
+                            let ips = e.data.match(/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g);
+                            if (ips !== null && ips.length >= 1) {
+                                ips = ips.filter((val, index, self) => { return self.indexOf(val) === index; });
+                                ips.forEach(ip => {
+                                    window.mods.globe.addTemporaryConnectedMarker(ip);
+                                });
+                            }
+                        });
+                        break;
+                    }
                     case "New cwd":
                         this.cwd = args[1];
                         this.oncwdchange(this.cwd);
@@ -174,48 +214,6 @@ class Terminal {
             this.resendCWD = () => {
                 this.oncwdchange(this.cwd || null);
             };
-
-            let sockHost = opts.host || "127.0.0.1";
-            let sockPort = this.port;
-            let token = TOKEN_SECRET;
-
-            this.socket = new WebSocket(`ws://${sockHost}:${sockPort}/?token=${token}`);
-            this.socket.onopen = () => {
-                let attachAddon = new AttachAddon(this.socket);
-                this.term.loadAddon(attachAddon);
-                this.fit();
-            };
-            this.socket.onerror = e => {throw JSON.stringify(e)};
-            this.socket.onclose = e => {
-                if (this.onclose) {
-                    this.onclose(e);
-                }
-            };
-
-            this.lastSoundFX = Date.now();
-            this.socket.addEventListener("message", e => {
-                let d = Date.now();
-
-                if (d - this.lastSoundFX > 30) {
-                    if(window.passwordMode == "false")
-                        window.audioManager.stdout.play();
-                    this.lastSoundFX = d;
-                }
-                if (d - this.lastRefit > 10000) {
-                    this.fit();
-                }
-                // See #397
-                if (!window.settings.experimentalGlobeFeatures) return;
-                let ips = e.data.match(/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/g);
-                if (ips !== null && ips.length >= 1) {
-                    ips = ips.filter((val, index, self) => { return self.indexOf(val) === index; });
-                    ips.forEach(ip => {
-                        window.mods.globe.addTemporaryConnectedMarker(ip);
-                    });
-    });
-}
-                }
-            });
 
             let parent = document.getElementById(opts.parentId);
             parent.addEventListener("wheel", e => {
@@ -306,6 +304,8 @@ class Terminal {
         }
 
         else if (opts.role === "server") {
+            const crypto = require("crypto");
+            const TOKEN_SECRET = crypto.randomBytes(32).toString("hex"); // generate once on server
             const Pty = require("node-pty");
             const Websocket = require("ws").Server;
             const {ipcMain} = require("electron");
@@ -430,7 +430,8 @@ class Terminal {
                     try {
                         const url = new URL(`http://localhost${info.req.url}`);
                         const token = url.searchParams.get("token");
-                        const isLocal = info.req.socket.remoteAddress === "127.0.0.1" || info.req.socket.remoteAddress === "::1";
+                        const ra = info.req.socket.remoteAddress;
+                        const isLocal = ra === "127.0.0.1" || ra === "::1" || ra === "::ffff:127.0.0.1";
                         return isLocal && token === TOKEN_SECRET;
                     } catch {
                         return false;
@@ -443,6 +444,8 @@ class Terminal {
                 switch(args[0]) {
                     case "Renderer startup":
                         this.renderer = e.sender;
+                        // Send auth token to client first
+                        try { this.renderer.send("terminal_channel-"+this.port, "Auth token", TOKEN_SECRET); } catch {}
                         if (!this._closed) {
                             if (!this._disableCWDtracking && this.tty._cwd) {
                                 this.renderer.send("terminal_channel-"+this.port, "New cwd", this.tty._cwd);
