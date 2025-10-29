@@ -27,7 +27,9 @@
   <launchable type="desktop-id">com.xdex.ui.desktop</launchable>
   <url type="homepage">https://github.com/andreas-hartmann/xdex-ui</url>
   <url type="bugtracker">https://github.com/andreas-hartmann/xdex-ui/issues</url>
-  <developer_name>Gabriel 'Squared' SAILLARD and Andreas Hartmann</developer_name>
+  <developer id="com.xdex">
+    <name>Gabriel 'Squared' SAILLARD and Andreas Hartmann</name>
+  </developer>
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/andreas-hartmann/xdex-ui/master/media/screenshot_default.png</image>

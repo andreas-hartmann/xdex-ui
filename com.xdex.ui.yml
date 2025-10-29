@@ -28,28 +28,31 @@ modules:
         XDG_CACHE_HOME: /run/build/xdex-ui/flatpak-node/cache
         ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     build-commands:
-      # Install dependencies
+      # Install root dependencies
       - npm install --offline --legacy-peer-deps
+      
+      # Install src dependencies
       - cd src && npm install --offline --legacy-peer-deps && cd ..
       
-      # Run prebuild
+      # Run prebuild script
       - rsync -a src/ prebuild-src --exclude node_modules
       - node prebuild-minify.js
       - cd prebuild-src && npm install --offline --legacy-peer-deps && cd ..
       
-      # Package the application
+      # Build with electron-builder
       - |
-        . /usr/lib/sdk/node18/enable.sh
         npm exec --offline --legacy-peer-deps -- electron-builder \
           --linux dir \
           --config.electronDist=/app/lib/electron \
-          --config.electronVersion=$(node -p "require('electron/package.json').version")
+          --config.electronVersion=$(cat /app/lib/electron/version)
       
-      # Install the unpacked application
+      # Install the built application
       - cp -r dist/linux-unpacked /app/xdex-ui
       
-      # Install desktop file and icon
+      # Install desktop file
       - install -Dm644 com.xdex.ui.desktop /app/share/applications/com.xdex.ui.desktop
+      
+      # Install icons
       - install -Dm644 media/linuxIcons/512x512.png /app/share/icons/hicolor/512x512/apps/com.xdex.ui.png
       - install -Dm644 media/linuxIcons/256x256.png /app/share/icons/hicolor/256x256/apps/com.xdex.ui.png
       - install -Dm644 media/linuxIcons/128x128.png /app/share/icons/hicolor/128x128/apps/com.xdex.ui.png
@@ -62,10 +65,10 @@ modules:
       
       # Create wrapper script
       - |
-        cat > /app/bin/xdex-ui <<EOF
+        cat > /app/bin/xdex-ui <<'EOF'
         #!/bin/sh
-        export TMPDIR="\$XDG_RUNTIME_DIR/app/\$FLATPAK_ID"
-        exec zypak-wrapper /app/xdex-ui/xdex-ui "\$@"
+        export TMPDIR="$XDG_RUNTIME_DIR/app/$FLATPAK_ID"
+        exec zypak-wrapper /app/xdex-ui/xdex-ui "$@"
         EOF
       - chmod +x /app/bin/xdex-ui
     sources:
