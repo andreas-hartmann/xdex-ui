@@ -60,6 +60,9 @@ jobs:
               json.dump(merged, out, indent=2)
           print(f'Merged {len(data1)} + {len(data2)} = {len(merged)} sources')
           PYEOF
+          
+          # Clean up temporary file
+          rm generated-sources-src.json
       
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
