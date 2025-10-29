@@ -1,0 +1,69 @@
+name: Build Flatpak
+
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-flatpak:
+    name: Build Flatpak
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Generate npm sources for flatpak
+        run: |
+          # Install flatpak-node-generator
+          git clone https://github.com/flatpak/flatpak-builder-tools.git /tmp/flatpak-builder-tools
+          
+          # Generate npm sources for root package
+          cd /tmp/flatpak-builder-tools/node
+          python3 flatpak-node-generator.py npm ${GITHUB_WORKSPACE}/package-lock.json -o ${GITHUB_WORKSPACE}/generated-sources.json
+          
+          # Generate npm sources for src package
+          python3 flatpak-node-generator.py npm ${GITHUB_WORKSPACE}/src/package-lock.json -o ${GITHUB_WORKSPACE}/generated-sources-src.json
+          
+          # Merge the two generated files
+          python3 -c "
+          import json
+          with open('${GITHUB_WORKSPACE}/generated-sources.json', 'r') as f1:
+              data1 = json.load(f1)
+          with open('${GITHUB_WORKSPACE}/generated-sources-src.json', 'r') as f2:
+              data2 = json.load(f2)
+          merged = data1 + data2
+          with open('${GITHUB_WORKSPACE}/generated-sources.json', 'w') as out:
+              json.dump(merged, out, indent=2)
+          "
+      
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: xdex-ui.flatpak
+          manifest-path: com.xdex.ui.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+      
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flatpak
+          path: xdex-ui.flatpak
+          if-no-files-found: error
