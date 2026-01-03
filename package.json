@@ -102,12 +102,12 @@
   "dependencies": {
     "@electron/rebuild": "4.0.1",
     "clean-css": "5.3.3",
-    "electron": "^36.8.1",
+    "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
-    "mime-types": "^3.0.1",
-    "node-abi": "4.15.0",
+    "mime-types": "^3.0.2",
+    "node-abi": "4.24.0",
     "node-json-minify": "3.0.0",
-    "terser": "5.44.0"
+    "terser": "5.44.1"
   },
   "optionalDependencies": {
     "cson-parser": "4.0.9"

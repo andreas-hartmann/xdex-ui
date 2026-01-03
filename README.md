@@ -81,10 +81,18 @@ Sadly, this is technically impossible to do on Windows right now, so the file br
 - [The Geek Freaks (Youtube/German)](https://youtu.be/TSjMIeLG0Sk)
 - [JSNation Open Source Awards 2021](https://osawards.com/javascript/#nominees) (Nominee - Fun Side Project of the Year)
 
+## Configuration
+
+After launching xDEX-UI for the first time, default configuration files will be created in `$HOME/.config/xDEX-UI/`.
+
+`settings.json`: General settings.
+`shortcuts.json`: Keyboard shortcuts.
+
+When reporting an issue, please test to see if it also occurs after deleting this directory to have it recreated with default settings (create a backup first).
 
 ## Useful commands for the nerds
 
-**IMPORTANT NOTE:** the following instructions are meant for running xDEX-UI from the latest unoptimized, unreleased, development version. If you'd like to get stable software instead, refer to [these](#how-do-i-get-it) instructions. As of today, only Linux is tested and supported.
+**IMPORTANT NOTE:** the following instructions are meant for running xDEX-UI from the latest unoptimized, unreleased, development version. If you'd like to get stable software instead, refer to [these](#how-do-i-get-it) instructions. As of today, only Linux is officially tested and supported.
 
 #### Starting from source:
 on *nix systems (You'll need the Xcode command line tools on macOS):

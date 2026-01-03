@@ -1,4 +1,4 @@
-// This is an helper script to generate the resources used by eDEX to display file-specific icons in fsDisp, from a fresh file-icons/source GitHub clone.
+// This is an helper script to generate the resources used by xDEX-UI to display file-specific icons in fsDisp, from a fresh file-icons/source GitHub clone.
 // Generated files are:
 // - src/assets/icons/file-icons.json: monolithic JSON files containing SVG data needed to draw all the icons.
 // - src/assets/misc/file-icons-match.js: script to match filenames to icons by using regex expressions.
@@ -123,7 +123,7 @@ fs.readdirSync(path.join(__dirname, "file-icons", "bytesize-icons", "dist", "ico
         svg
     };
 });
-// Override with eDEX-specific icons
+// Override with xDEX-UI-specific icons
 fileIconsObject.showDisks = {
     width: 24,
     height: 24,

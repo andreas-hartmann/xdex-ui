@@ -4,7 +4,7 @@ const { enable } = require('@electron/remote/main');
 
 process.on("uncaughtException", e => {
     signale.fatal(e);
-    dialog.showErrorBox("eDEX-UI crashed", e.message || "Cannot retrieve error message.");
+    dialog.showErrorBox("xDEX-UI crashed", e.message || "Cannot retrieve error message.");
     if (tty) {
         tty.close();
     }
@@ -18,13 +18,13 @@ process.on("uncaughtException", e => {
     process.exit(1);
 });
 
-signale.start(`Starting eDEX-UI v${app.getVersion()}`);
+signale.start(`Starting xDEX-UI v${app.getVersion()}`);
 signale.info(`With Node ${process.versions.node} and Electron ${process.versions.electron}`);
 signale.info(`Renderer is Chrome ${process.versions.chrome}`);
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
-    signale.fatal("Error: Another instance of eDEX is already running. Cannot proceed.");
+    signale.fatal("Error: Another instance of xDEX-UI is already running. Cannot proceed.");
     app.exit(1);
 }
 
@@ -92,6 +92,9 @@ if (!fs.existsSync(settingsFile)) {
         nointro: false,
         nocursor: false,
         forceFullscreen: true,
+        windowWidth: 1280,
+        windowHeight: 720,
+        openDevTools: false,
         allowWindowed: false,
         excludeThreadsFromToplist: true,
         hideDotfiles: false,
@@ -179,14 +182,34 @@ function createWindow(settings) {
     } else {
         display = electron.screen.getPrimaryDisplay();
     }
-    let {x, y, width, height} = display.bounds;
-    width++; height++;
+    let {x, y, width: displayWidth, height: displayHeight} = display.bounds;
+
+    let winWidth, winHeight, winX, winY;
+    if (settings.forceFullscreen) {
+        winWidth = displayWidth + 1;
+        winHeight = displayHeight + 1;
+        winX = x;
+        winY = y;
+    } else if (settings.allowWindowed) {
+        winWidth = Number(settings.windowWidth) || 1280;
+        winHeight = Number(settings.windowHeight) || 720;
+        if (winWidth > displayWidth) winWidth = displayWidth;
+        if (winHeight > displayHeight) winHeight = displayHeight;
+        winX = x + Math.floor((displayWidth - winWidth) / 2);
+        winY = y + Math.floor((displayHeight - winHeight) / 2);
+    } else {
+        winWidth = displayWidth + 1;
+        winHeight = displayHeight + 1;
+        winX = x;
+        winY = y;
+    }
+
     win = new BrowserWindow({
-        title: "eDEX-UI",
-        x,
-        y,
-        width,
-        height,
+        title: "xDEX-UI",
+        x: winX,
+        y: winY,
+        width: winWidth,
+        height: winHeight,
         show: false,
         resizable: true,
         movable: settings.allowWindowed || false,
@@ -196,7 +219,7 @@ function createWindow(settings) {
         backgroundColor: '#000000',
         webPreferences: {
             devTools: true,
-	    enableRemoteModule: true,
+	    	enableRemoteModule: true,
             contextIsolation: false,
             backgroundThrottling: false,
             webSecurity: true,
@@ -217,6 +240,14 @@ function createWindow(settings) {
 
     signale.complete("Frontend window created!");
     win.show();
+    if (settings.openDevTools) {
+        try {
+            win.webContents.openDevTools({ mode: 'detach' });
+            signale.info('Browser devtools opened (detach mode)');
+        } catch (e) {
+            signale.warn('Could not open devtools:', e.message || e);
+        }
+    }
     if (!settings.allowWindowed) {
         win.setResizable(false);
     } else if (!require(lastWindowStateFile)["useFullscreen"]) {
@@ -229,6 +260,17 @@ function createWindow(settings) {
 app.on('ready', async () => {
     signale.pending(`Loading settings file...`);
     let settings = require(settingsFile);
+    // CLI overrides: allow starting windowed with `--windowed` or `-w`
+    const cliArgs = process.argv.slice(2);
+    if (cliArgs.includes('--windowed') || cliArgs.includes('-w')) {
+        signale.info('CLI: --windowed detected; launching windowed');
+        settings.forceFullscreen = false;
+        settings.allowWindowed = true;
+    }
+    if (cliArgs.includes('--devtools') || cliArgs.includes('-d')) {
+        signale.info('CLI: --devtools detected; opening browser devtools');
+        settings.openDevTools = true;
+    }
     signale.pending(`Resolving shell path...`);
     settings.shell = await which(settings.shell).catch(e => { throw(e) });
     signale.info(`Shell found at ${settings.shell}`);
@@ -242,7 +284,7 @@ app.on('ready', async () => {
     Object.assign(cleanEnv, {
         TERM: "xterm-256color",
         COLORTERM: "truecolor",
-        TERM_PROGRAM: "eDEX-UI",
+        TERM_PROGRAM: "xDEX-UI",
         TERM_PROGRAM_VERSION: app.getVersion()
     }, settings.env);
 

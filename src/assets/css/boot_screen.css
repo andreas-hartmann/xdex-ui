@@ -50,7 +50,7 @@ section#boot_screen h1.glitch {
 }
 
 section#boot_screen h1::before {
-    content: "eDEX-UI";
+    content: "xDEX-UI";
     display: block;
     transform: translateY(100%) translateX(-2%);
     clip-path: polygon(100% 0%, 100% 40%, 0% 40%, 0% 0%);
@@ -78,7 +78,7 @@ section#boot_screen h1.glitch::before {
 }
 
 section#boot_screen h1::after {
-    content: "eDEX-UI";
+    content: "xDEX-UI";
     display: block;
     transform: translateY(-100%) translateX(2%);
     clip-path: polygon(100% 40%, 100% 100%, 0% 100%, 0% 40%);
