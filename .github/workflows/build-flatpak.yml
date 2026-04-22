@@ -73,11 +73,22 @@ jobs:
           rm generated-sources-src.json
       
       - name: Build Flatpak
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
-        with:
-          bundle: xdex-ui.flatpak
-          manifest-path: com.xdex.ui.yml
-          cache-key: flatpak-builder-${{ github.sha }}
+        run: |
+          sudo xvfb-run --auto-servernum flatpak-builder \
+            --repo=repo \
+            --disable-rofiles-fuse \
+            --install-deps-from=flathub \
+            --force-clean \
+            --default-branch=master \
+            --arch=x86_64 \
+            --ccache \
+            --state-dir .flatpak-builder \
+            flatpak_app com.xdex.ui.yml
+
+          sudo flatpak build-bundle repo xdex-ui.flatpak com.xdex.ui master
+
+          # Ensure the artifact and build outputs are readable by the runner user.
+          sudo chown -R "$USER":"$USER" repo flatpak_app .flatpak-builder xdex-ui.flatpak
       
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v4
