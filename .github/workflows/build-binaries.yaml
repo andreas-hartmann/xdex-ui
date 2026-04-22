@@ -70,11 +70,12 @@ jobs:
     - name: Run prebuild outside of QEMU emulator
       run: npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
     - name: Build for armv7l
-      uses: docker://arm32v7/node:20-bullseye
-      with:
-        args: bash -c "npm install && ./node_modules/.bin/electron-builder build -l --armv7l"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        docker run --rm --platform linux/arm/v7 \
+          -e GH_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+          -v "$PWD":/work -w /work \
+          node:20-bullseye \
+          bash -lc "npm install && ./node_modules/.bin/electron-builder build -l --armv7l"
     - uses: actions/upload-artifact@v4
       with:
         name: Linux-armv7l-AppImage
@@ -108,12 +109,13 @@ jobs:
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Run prebuild outside of QEMU emulator
       run: npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
-    - name: Build for arm64 (aka arm64v8)
-      uses: docker://arm64v8/node:20-bullseye
-      with:
-        args: bash -c "npm install && ./node_modules/.bin/electron-builder build -l --arm64"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build for arm64
+      run: |
+        docker run --rm --platform linux/arm64 \
+          -e GH_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+          -v "$PWD":/work -w /work \
+          node:20-bullseye \
+          bash -lc "npm install && ./node_modules/.bin/electron-builder build -l --arm64"
     - uses: actions/upload-artifact@v4
       with:
         name: Linux-arm64-AppImage
