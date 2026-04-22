@@ -209,6 +209,21 @@ window.audioManager = new AudioManager();
 // See #223
 remote.app.focus();
 
+function redrawTerminalCanvas(parentId) {
+    try {
+        const parent = document.getElementById(parentId);
+        if (!parent) return;
+        const canvases = parent.querySelectorAll('canvas');
+        canvases.forEach(c => {
+            const prev = c.style.visibility || '';
+            c.style.visibility = 'hidden';
+            requestAnimationFrame(() => requestAnimationFrame(() => { c.style.visibility = prev; }));
+        });
+    } catch (e) {
+        // ignore
+    }
+}
+
 let i = 0;
 if (window.settings.nointro || window.settings.nointroOverride) {
     initGraphicalErrorHandling();
@@ -324,10 +339,10 @@ async function displayTitleScreen() {
     }
     initGraphicalErrorHandling();
     initSystemInformationProxy();
-    // waitForFonts().then(() => {
+    waitForFonts().then(() => {
         bootScreen.remove();
         initUI();
-    // });
+    });
 }
 
 // Returns the user's desired display name
@@ -493,6 +508,8 @@ async function initUI() {
     window.term[0].term.writeln("\x1b[1m" + `Welcome to xDEX-UI v${remote.app.getVersion()} - Electron v${process.versions.electron}` +"\x1b[0m");
 
     await _delay(100);
+
+    redrawTerminalCanvas('terminal0');
 
     window.fsDisp = new FilesystemDisplay({
         parentId: "filesystem"
