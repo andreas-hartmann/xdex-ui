@@ -278,11 +278,15 @@ class Terminal {
             };
 
             this.write = cmd => {
-                this.socket.send(cmd);
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(cmd);
+                }
             };
 
             this.writelr = cmd => {
-                this.socket.send(cmd+"\r");
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(cmd+"\r");
+                }
             };
 
             this.clipboard = {
@@ -423,11 +427,29 @@ class Terminal {
                 port: this.port,
                 clientTracking: true,
                 verifyClient: info => {
-                    if (this.wss.clients.length >= 1) {
+                    // Security fix for CVE-2023-30856: Verify Origin header to prevent cross-site websocket hijacking
+                    // Only allow connections from local file:// protocol (Electron app) or null origin
+                    const origin = info.origin;
+                    const isLocalOrigin = origin === "null" || (typeof origin === "string" && origin.startsWith("file://"));
+                    const remoteAddress = (info.req && info.req.socket) ? info.req.socket.remoteAddress : null;
+                    const isLoopbackClient = remoteAddress === "127.0.0.1" || remoteAddress === "::1" || remoteAddress === "::ffff:127.0.0.1";
+                    
+                    // Also check that only one client is connected at a time
+                    if (this.wss.clients.size >= 1) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    
+                    // Reject connections from web origins (http://, https://)
+                    if (!isLocalOrigin) {
+                        return false;
+                    }
+
+                    // Reject remote clients even when origin is omitted or spoofed
+                    if (!isLoopbackClient) {
+                        return false;
+                    }
+                    
+                    return true;
                 }
             });
             this.Ipc.on("terminal_channel-"+this.port, (e, ...args) => {

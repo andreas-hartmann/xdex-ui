@@ -32,13 +32,19 @@ if (cluster.isMaster) {
         let selectedID = lastID+1;
         if (selectedID > numCPUs-1) selectedID = 0;
 
-        cluster.workers[workers[selectedID]].send(JSON.stringify({
-            id,
-            type,
-            arg
-        }));
+        const worker = cluster.workers[workers[selectedID]];
+        if (worker && worker.isConnected()) {
+            worker.send(JSON.stringify({
+                id,
+                type,
+                arg
+            }));
+            lastID = selectedID;
+            return true;
+        }
 
         lastID = selectedID;
+        return false;
     }
 
     var queue = {};
@@ -56,14 +62,21 @@ if (cluster.isMaster) {
             });
         } else {
             queue[id] = e.sender;
-            dispatch(type, id, args[0]);
+            if (!dispatch(type, id, args[0])) {
+                delete queue[id];
+                si[type](args[0]).then(res => {
+                    if (e.sender && !e.sender.isDestroyed()) {
+                        e.sender.send("systeminformation-reply-"+id, res);
+                    }
+                });
+            }
         }
     });
 
     cluster.on("message", (worker, msg) => {
         msg = JSON.parse(msg);
         try {
-            if (!queue[msg.id].isDestroyed()) {
+            if (queue[msg.id] && !queue[msg.id].isDestroyed()) {
                 queue[msg.id].send("systeminformation-reply-"+msg.id, msg.res);
                 delete queue[msg.id];
             }
