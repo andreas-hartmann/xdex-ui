@@ -278,11 +278,15 @@ class Terminal {
             };
 
             this.write = cmd => {
-                this.socket.send(cmd);
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(cmd);
+                }
             };
 
             this.writelr = cmd => {
-                this.socket.send(cmd+"\r");
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(cmd+"\r");
+                }
             };
 
             this.clipboard = {
@@ -423,11 +427,22 @@ class Terminal {
                 port: this.port,
                 clientTracking: true,
                 verifyClient: info => {
+                    // Security fix for CVE-2023-30856: Verify Origin header to prevent cross-site websocket hijacking
+                    // Only allow connections from local file:// protocol (Electron app) or null origin
+                    const origin = info.origin;
+                    const isLocalOrigin = !origin || origin === 'null' || origin.startsWith('file://');
+                    
+                    // Also check that only one client is connected at a time
                     if (this.wss.clients.length >= 1) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    
+                    // Reject connections from web origins (http://, https://)
+                    if (!isLocalOrigin) {
+                        return false;
+                    }
+                    
+                    return true;
                 }
             });
             this.Ipc.on("terminal_channel-"+this.port, (e, ...args) => {

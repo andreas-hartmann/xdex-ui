@@ -32,11 +32,14 @@ if (cluster.isMaster) {
         let selectedID = lastID+1;
         if (selectedID > numCPUs-1) selectedID = 0;
 
-        cluster.workers[workers[selectedID]].send(JSON.stringify({
-            id,
-            type,
-            arg
-        }));
+        const worker = cluster.workers[workers[selectedID]];
+        if (worker && worker.isConnected()) {
+            worker.send(JSON.stringify({
+                id,
+                type,
+                arg
+            }));
+        }
 
         lastID = selectedID;
     }
@@ -63,7 +66,7 @@ if (cluster.isMaster) {
     cluster.on("message", (worker, msg) => {
         msg = JSON.parse(msg);
         try {
-            if (!queue[msg.id].isDestroyed()) {
+            if (queue[msg.id] && !queue[msg.id].isDestroyed()) {
                 queue[msg.id].send("systeminformation-reply-"+msg.id, msg.res);
                 delete queue[msg.id];
             }
