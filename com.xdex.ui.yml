@@ -24,26 +24,31 @@ modules:
       append-path: /usr/lib/sdk/node18/bin
       env:
         NPM_CONFIG_LOGLEVEL: info
+        NPM_CONFIG_CACHE: /tmp/flatpak-node/npm-cache
         npm_config_cache: /tmp/flatpak-node/npm-cache
+        NPM_CONFIG_DEVDIR: /tmp/flatpak-node/node-gyp
+        npm_config_devdir: /tmp/flatpak-node/node-gyp
+        npm_config_node_gyp: /usr/lib/sdk/node18/bin/node-gyp
+        HOME: /tmp
         XDG_CACHE_HOME: /tmp/flatpak-node/cache
         ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     build-commands:
-      - mkdir -p /tmp/flatpak-node/npm-cache /tmp/flatpak-node/cache
+      - mkdir -p /tmp/flatpak-node/npm-cache /tmp/flatpak-node/cache /tmp/flatpak-node/node-gyp
 
       # Install root dependencies
-      - npm install --offline --legacy-peer-deps
+      - NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp npm install --offline --legacy-peer-deps
       
       # Install src dependencies
-      - cd src && npm install --offline --legacy-peer-deps && cd ..
+      - cd src && NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp npm install --offline --legacy-peer-deps && cd ..
       
       # Run prebuild script
       - rsync -a src/ prebuild-src --exclude node_modules
       - node prebuild-minify.js
-      - cd prebuild-src && npm install --offline --legacy-peer-deps && cd ..
+      - cd prebuild-src && NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp npm install --offline --legacy-peer-deps && cd ..
       
       # Build with electron-builder
       - |
-        npm exec --offline --legacy-peer-deps -- electron-builder \
+        NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp npm exec --offline --legacy-peer-deps -- electron-builder \
           --linux dir \
           --config.electronDist=/app/lib/electron \
           --config.electronVersion=$(cat /app/lib/electron/version)
