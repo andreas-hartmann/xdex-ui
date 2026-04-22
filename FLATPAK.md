@@ -24,6 +24,7 @@ The built Flatpak is uploaded as an artifact named `Flatpak` and can be download
 To build the Flatpak locally, you'll need:
 - flatpak
 - flatpak-builder
+- Python 3 (for generating npm sources)
 
 ### Steps:
 
@@ -35,17 +36,47 @@ To build the Flatpak locally, you'll need:
    flatpak install flathub org.freedesktop.Sdk.Extension.node18//23.08
    ```
 
-2. Build the Flatpak:
+2. Generate npm sources for offline building:
+   ```bash
+   # Clone flatpak-builder-tools
+   git clone https://github.com/flatpak/flatpak-builder-tools.git /tmp/flatpak-builder-tools
+   cd /tmp/flatpak-builder-tools/node
+   
+   # Install Python dependencies
+   python3 -m pip install --user aiohttp PyYAML
+   
+   # Generate sources for root package
+   python3 -m flatpak_node_generator npm /path/to/xdex-ui/package-lock.json -o /path/to/xdex-ui/generated-sources.json
+   
+   # Generate sources for src package
+   python3 -m flatpak_node_generator npm /path/to/xdex-ui/src/package-lock.json -o /path/to/xdex-ui/generated-sources-src.json
+   
+   # Merge the generated files
+   cd /path/to/xdex-ui
+   python3 << 'EOF'
+   import json
+   with open('generated-sources.json', 'r') as f1:
+       data1 = json.load(f1)
+   with open('generated-sources-src.json', 'r') as f2:
+       data2 = json.load(f2)
+   merged = data1 + data2
+   with open('generated-sources.json', 'w') as out:
+       json.dump(merged, out, indent=2)
+   EOF
+   rm generated-sources-src.json
+   ```
+
+3. Build the Flatpak:
    ```bash
    flatpak-builder --force-clean --user --install-deps-from=flathub build-dir com.xdex.ui.yml
    ```
 
-3. Install the built Flatpak:
+4. Install the built Flatpak:
    ```bash
    flatpak-builder --user --install --force-clean build-dir com.xdex.ui.yml
    ```
 
-4. Run the application:
+5. Run the application:
    ```bash
    flatpak run com.xdex.ui
    ```
@@ -70,4 +101,4 @@ flatpak install xdex-ui.flatpak
 - The Flatpak uses the Electron BaseApp to provide the Electron runtime
 - The application has full filesystem access (`--filesystem=host`) to function properly as a terminal emulator
 - Node.js 18 is used for building (via the org.freedesktop.Sdk.Extension.node18 extension)
-- npm dependencies are resolved during the Flatpak build (network access is required while building)
+- The generated-sources.json file is auto-generated and should not be committed to the repository
