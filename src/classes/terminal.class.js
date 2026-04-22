@@ -430,15 +430,22 @@ class Terminal {
                     // Security fix for CVE-2023-30856: Verify Origin header to prevent cross-site websocket hijacking
                     // Only allow connections from local file:// protocol (Electron app) or null origin
                     const origin = info.origin;
-                    const isLocalOrigin = !origin || origin === 'null' || origin.startsWith('file://');
+                    const isLocalOrigin = origin === "null" || (typeof origin === "string" && origin.startsWith("file://"));
+                    const remoteAddress = (info.req && info.req.socket) ? info.req.socket.remoteAddress : null;
+                    const isLoopbackClient = remoteAddress === "127.0.0.1" || remoteAddress === "::1" || remoteAddress === "::ffff:127.0.0.1";
                     
                     // Also check that only one client is connected at a time
-                    if (this.wss.clients.length >= 1) {
+                    if (this.wss.clients.size >= 1) {
                         return false;
                     }
                     
                     // Reject connections from web origins (http://, https://)
                     if (!isLocalOrigin) {
+                        return false;
+                    }
+
+                    // Reject remote clients even when origin is omitted or spoofed
+                    if (!isLoopbackClient) {
                         return false;
                     }
                     

@@ -39,9 +39,12 @@ if (cluster.isMaster) {
                 type,
                 arg
             }));
+            lastID = selectedID;
+            return true;
         }
 
         lastID = selectedID;
+        return false;
     }
 
     var queue = {};
@@ -59,7 +62,14 @@ if (cluster.isMaster) {
             });
         } else {
             queue[id] = e.sender;
-            dispatch(type, id, args[0]);
+            if (!dispatch(type, id, args[0])) {
+                delete queue[id];
+                si[type](args[0]).then(res => {
+                    if (e.sender && !e.sender.isDestroyed()) {
+                        e.sender.send("systeminformation-reply-"+id, res);
+                    }
+                });
+            }
         }
     });
 
