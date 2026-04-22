@@ -38,40 +38,6 @@ jobs:
           sudo apt-get install -y flatpak flatpak-builder
           sudo flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
       
-      - name: Generate npm sources for flatpak
-        run: |
-          # Install flatpak-node-generator dependencies
-          python3 -m pip install aiohttp PyYAML
-          
-          # Clone flatpak-builder-tools
-          git clone https://github.com/flatpak/flatpak-builder-tools.git /tmp/flatpak-builder-tools
-          
-          # Generate npm sources for root package
-          cd /tmp/flatpak-builder-tools/node
-          python3 -m flatpak_node_generator npm ${GITHUB_WORKSPACE}/package-lock.json -o ${GITHUB_WORKSPACE}/generated-sources.json
-          
-          # Generate npm sources for src package
-          python3 -m flatpak_node_generator npm ${GITHUB_WORKSPACE}/src/package-lock.json -o ${GITHUB_WORKSPACE}/generated-sources-src.json
-          
-          # Merge the two generated files
-          cd ${GITHUB_WORKSPACE}
-          python3 << 'PYEOF'
-          import json
-          import os
-          workspace = os.environ['GITHUB_WORKSPACE']
-          with open(f'{workspace}/generated-sources.json', 'r') as f1:
-              data1 = json.load(f1)
-          with open(f'{workspace}/generated-sources-src.json', 'r') as f2:
-              data2 = json.load(f2)
-          merged = data1 + data2
-          with open(f'{workspace}/generated-sources.json', 'w') as out:
-              json.dump(merged, out, indent=2)
-          print(f'Merged {len(data1)} + {len(data2)} = {len(merged)} sources')
-          PYEOF
-          
-          # Clean up temporary file
-          rm generated-sources-src.json
-      
       - name: Build Flatpak
         run: |
           sudo xvfb-run --auto-servernum flatpak-builder \
