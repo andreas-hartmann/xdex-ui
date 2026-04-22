@@ -43,7 +43,7 @@ To build the Flatpak locally, you'll need:
    cd /tmp/flatpak-builder-tools/node
    
    # Install Python dependencies
-   pip3 install --user aiohttp
+   python3 -m pip install --user aiohttp PyYAML
    
    # Generate sources for root package
    python3 -m flatpak_node_generator npm /path/to/xdex-ui/package-lock.json -o /path/to/xdex-ui/generated-sources.json

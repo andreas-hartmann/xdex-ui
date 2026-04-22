@@ -35,7 +35,7 @@ jobs:
       - name: Generate npm sources for flatpak
         run: |
           # Install flatpak-node-generator dependencies
-          pip3 install aiohttp
+          python3 -m pip install aiohttp PyYAML
           
           # Clone flatpak-builder-tools
           git clone https://github.com/flatpak/flatpak-builder-tools.git /tmp/flatpak-builder-tools
