@@ -36,8 +36,8 @@ jobs:
       run: npm install
     - name: Run prebuild script
       run: npm run prebuild-linux
-    - name: Build for x64 / ia32
-      run: ./node_modules/.bin/electron-builder build -l --x64 --ia32
+    - name: Build for x64
+      run: ./node_modules/.bin/electron-builder build -l --x64
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/upload-artifact@v4
