@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.xdex.ui</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+  <name>xDEX-UI</name>
+  <summary>A science fiction desktop running everywhere</summary>
+  <description>
+    <p>
+      xDEX-UI is a fullscreen, cross-platform terminal emulator and system monitor that looks and feels like a sci-fi computer interface.
+      It is an updated and lightly maintained fork of the abandoned eDEX-UI Project.
+    </p>
+    <p>
+      Heavily inspired from the TRON Legacy movie effects, xDEX-UI strives to maintain a certain level of functionality and to be usable in real-life scenarios,
+      with the larger goal of bringing science-fiction UXs to the mainstream.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Fully featured terminal emulator with tabs, colors, mouse events, and support for curses and curses-like applications</li>
+      <li>Real-time system (CPU, RAM, swap, processes) and network (GeoIP, active connections, transfer rates) monitoring</li>
+      <li>Full support for touch-enabled displays, including an on-screen keyboard</li>
+      <li>Directory viewer that follows the CWD (current working directory) of the terminal</li>
+      <li>Advanced customization using themes, on-screen keyboard layouts, CSS injections</li>
+      <li>Optional sound effects for maximum hollywood hacking vibe</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">com.xdex.ui.desktop</launchable>
+  <url type="homepage">https://github.com/andreas-hartmann/xdex-ui</url>
+  <url type="bugtracker">https://github.com/andreas-hartmann/xdex-ui/issues</url>
+  <developer id="com.xdex">
+    <name>Gabriel 'Squared' SAILLARD and Andreas Hartmann</name>
+  </developer>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/andreas-hartmann/xdex-ui/master/media/screenshot_default.png</image>
+      <caption>xDEX-UI with the default "tron" theme</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/andreas-hartmann/xdex-ui/master/media/screenshot_blade.png</image>
+      <caption>xDEX-UI with the "blade" theme</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/andreas-hartmann/xdex-ui/master/media/screenshot_disrupted.png</image>
+      <caption>xDEX-UI with the experimental "tron-disrupted" theme</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/andreas-hartmann/xdex-ui/master/media/screenshot_horizon.png</image>
+      <caption>xDEX-UI with the custom horizon-full theme</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="3.0.0" date="2024-01-01" />
+  </releases>
+  <categories>
+    <category>System</category>
+    <category>TerminalEmulator</category>
+    <category>Monitor</category>
+  </categories>
+  <keywords>
+    <keyword>terminal</keyword>
+    <keyword>emulator</keyword>
+    <keyword>system</keyword>
+    <keyword>monitor</keyword>
+    <keyword>sci-fi</keyword>
+  </keywords>
+</component>

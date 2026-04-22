@@ -1,0 +1,87 @@
+app-id: com.xdex.ui
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '23.08'
+command: xdex-ui
+separate-locales: false
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=pulseaudio
+  - --share=network
+  - --device=dri
+  - --filesystem=host
+  - --talk-name=org.freedesktop.Notifications
+  - --env=ELECTRON_TRASH=gio
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node18
+modules:
+  - name: xdex-ui
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/node18/bin
+      env:
+        NPM_CONFIG_LOGLEVEL: info
+        NPM_CONFIG_CACHE: /tmp/flatpak-node/npm-cache
+        npm_config_cache: /tmp/flatpak-node/npm-cache
+        NPM_CONFIG_DEVDIR: /tmp/flatpak-node/node-gyp
+        npm_config_devdir: /tmp/flatpak-node/node-gyp
+        NPM_CONFIG_USERCONFIG: /tmp/flatpak-node/npmrc
+        npm_config_userconfig: /tmp/flatpak-node/npmrc
+        npm_config_node_gyp: /usr/lib/sdk/node18/bin/node-gyp
+        HOME: /tmp
+        XDG_CACHE_HOME: /tmp/flatpak-node/cache
+        ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    build-commands:
+      - mkdir -p /tmp/flatpak-node/npm-cache /tmp/flatpak-node/cache /tmp/flatpak-node/node-gyp
+      - printf '%s\n' 'cache=/tmp/flatpak-node/npm-cache' 'devdir=/tmp/flatpak-node/node-gyp' 'audit=false' 'fund=false' > /tmp/flatpak-node/npmrc
+
+      # Install root dependencies
+      - NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp NPM_CONFIG_USERCONFIG=/tmp/flatpak-node/npmrc npm_config_userconfig=/tmp/flatpak-node/npmrc npm install --offline --ignore-scripts --legacy-peer-deps
+      
+      # Install src dependencies
+      - cd src && NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp NPM_CONFIG_USERCONFIG=/tmp/flatpak-node/npmrc npm_config_userconfig=/tmp/flatpak-node/npmrc npm install --offline --ignore-scripts --legacy-peer-deps && cd ..
+      
+      # Run prebuild script
+      - rsync -a src/ prebuild-src --exclude node_modules
+      - node prebuild-minify.js
+      - cd prebuild-src && NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp NPM_CONFIG_USERCONFIG=/tmp/flatpak-node/npmrc npm_config_userconfig=/tmp/flatpak-node/npmrc npm install --offline --ignore-scripts --legacy-peer-deps && cd ..
+      
+      # Build with electron-builder
+      - |
+        NPM_CONFIG_CACHE=/tmp/flatpak-node/npm-cache npm_config_cache=/tmp/flatpak-node/npm-cache NPM_CONFIG_DEVDIR=/tmp/flatpak-node/node-gyp npm_config_devdir=/tmp/flatpak-node/node-gyp NPM_CONFIG_USERCONFIG=/tmp/flatpak-node/npmrc npm_config_userconfig=/tmp/flatpak-node/npmrc npm exec --offline --legacy-peer-deps -- electron-builder \
+          --linux dir \
+          --config.electronDist=/app/lib/electron \
+          --config.electronVersion=$(cat /app/lib/electron/version)
+      
+      # Install the built application
+      - cp -r dist/linux-unpacked /app/xdex-ui
+      
+      # Install desktop file
+      - install -Dm644 com.xdex.ui.desktop /app/share/applications/com.xdex.ui.desktop
+      
+      # Install icons
+      - install -Dm644 media/linuxIcons/512x512.png /app/share/icons/hicolor/512x512/apps/com.xdex.ui.png
+      - install -Dm644 media/linuxIcons/256x256.png /app/share/icons/hicolor/256x256/apps/com.xdex.ui.png
+      - install -Dm644 media/linuxIcons/128x128.png /app/share/icons/hicolor/128x128/apps/com.xdex.ui.png
+      - install -Dm644 media/linuxIcons/64x64.png /app/share/icons/hicolor/64x64/apps/com.xdex.ui.png
+      - install -Dm644 media/linuxIcons/48x48.png /app/share/icons/hicolor/48x48/apps/com.xdex.ui.png
+      - install -Dm644 media/linuxIcons/32x32.png /app/share/icons/hicolor/32x32/apps/com.xdex.ui.png
+      
+      # Install AppStream metadata
+      - install -Dm644 com.xdex.ui.metainfo.xml /app/share/metainfo/com.xdex.ui.metainfo.xml
+      
+      # Create wrapper script
+      - |
+        cat > /app/bin/xdex-ui <<'EOF'
+        #!/bin/sh
+        export TMPDIR="$XDG_RUNTIME_DIR/app/$FLATPAK_ID"
+        exec zypak-wrapper /app/xdex-ui/xdex-ui "$@"
+        EOF
+      - chmod +x /app/bin/xdex-ui
+    sources:
+      - type: dir
+        path: .
+      - generated-sources.json

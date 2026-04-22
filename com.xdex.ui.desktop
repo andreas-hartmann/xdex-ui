@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=xDEX-UI
+Comment=A science fiction desktop running everywhere
+Exec=xdex-ui %U
+Icon=com.xdex.ui
+Type=Application
+Categories=System;TerminalEmulator;Monitor;
+Terminal=false
+StartupNotify=true
+StartupWMClass=xDEX-UI
+Keywords=terminal;emulator;system;monitor;sci-fi;

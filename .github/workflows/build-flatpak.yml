@@ -1,0 +1,91 @@
+name: Build Flatpak
+
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-flatpak:
+    name: Build Flatpak
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Flatpak tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          sudo flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Generate npm sources for flatpak
+        run: |
+          python3 -m pip install aiohttp PyYAML
+
+          git clone https://github.com/flatpak/flatpak-builder-tools.git /tmp/flatpak-builder-tools
+
+          cd /tmp/flatpak-builder-tools/node
+          python3 -m flatpak_node_generator npm ${GITHUB_WORKSPACE}/package-lock.json -o ${GITHUB_WORKSPACE}/generated-sources.json
+          python3 -m flatpak_node_generator npm ${GITHUB_WORKSPACE}/src/package-lock.json -o ${GITHUB_WORKSPACE}/generated-sources-src.json
+
+          cd ${GITHUB_WORKSPACE}
+          python3 << 'PYEOF'
+          import json
+          import os
+          workspace = os.environ['GITHUB_WORKSPACE']
+          with open(f'{workspace}/generated-sources.json', 'r') as f1:
+              data1 = json.load(f1)
+          with open(f'{workspace}/generated-sources-src.json', 'r') as f2:
+              data2 = json.load(f2)
+          merged = data1 + data2
+          with open(f'{workspace}/generated-sources.json', 'w') as out:
+              json.dump(merged, out, indent=2)
+          print(f'Merged {len(data1)} + {len(data2)} = {len(merged)} sources')
+          PYEOF
+
+          rm generated-sources-src.json
+      
+      - name: Build Flatpak
+        run: |
+          sudo xvfb-run --auto-servernum flatpak-builder \
+            --repo=repo \
+            --disable-rofiles-fuse \
+            --install-deps-from=flathub \
+            --force-clean \
+            --default-branch=master \
+            --arch=x86_64 \
+            --ccache \
+            --state-dir .flatpak-builder \
+            flatpak_app com.xdex.ui.yml
+
+          sudo flatpak build-bundle repo xdex-ui.flatpak com.xdex.ui master
+
+          # Ensure the artifact and build outputs are readable by the runner user.
+          sudo chown -R "$USER":"$USER" repo flatpak_app .flatpak-builder xdex-ui.flatpak
+      
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flatpak
+          path: xdex-ui.flatpak
+          if-no-files-found: error

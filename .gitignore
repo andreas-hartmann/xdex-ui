@@ -42,3 +42,7 @@ jspm_packages
 dist
 prebuild-src
 src/node_modules
+
+# Generated files for Flatpak builds
+generated-sources.json
+generated-sources-src.json
