@@ -31,9 +31,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 14
-    - name: Setup npm
-      run: sudo npm i -g npm@7
+        node-version: 20
     - name: Install build deps
       run: npm install
     - name: Run prebuild script
@@ -74,11 +72,11 @@ jobs:
         path: ~/.cache/electron
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Run prebuild outside of QEMU emulator
-      run: sudo npm i -g npm@7 && npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
+      run: npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
     - name: Build for arm32v7 (aka armv7l)
-      uses: docker://arm32v7/node:14-buster
+      uses: docker://arm32v7/node:20-bullseye
       with:
-        args: bash -c "npm i -g npm@7 && npm install && ./node_modules/.bin/electron-builder build -l --armv7l"
+        args: bash -c "npm install && ./node_modules/.bin/electron-builder build -l --armv7l"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/upload-artifact@v4
@@ -113,11 +111,11 @@ jobs:
         path: ~/.cache/electron
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Run prebuild outside of QEMU emulator
-      run: sudo npm i -g npm@7 && npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
+      run: npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
     - name: Build for arm64 (aka arm64v8)
-      uses: docker://arm64v8/node:14-buster
+      uses: docker://arm64v8/node:20-bullseye
       with:
-        args: bash -c "npm i -g npm@7 && npm install && ./node_modules/.bin/electron-builder build -l --arm64"
+        args: bash -c "npm install && ./node_modules/.bin/electron-builder build -l --arm64"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/upload-artifact@v4
@@ -150,9 +148,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 14
-    - name: Setup npm
-      run: npm i -g npm@7
+        node-version: 20
     - name: npm install
       run: npm install
     - name: npm build
@@ -189,9 +185,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 14
-    - name: Setup npm
-      run: sudo npm i -g npm@7
+        node-version: 20
     - name: npm install
       run: npm install
     - name: npm build
