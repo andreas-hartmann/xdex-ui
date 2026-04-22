@@ -100,7 +100,7 @@
     }
   },
   "dependencies": {
-    "@electron/rebuild": "4.0.1",
+    "@electron/rebuild": "4.0.3",
     "clean-css": "5.3.3",
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
