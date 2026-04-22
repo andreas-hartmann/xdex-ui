@@ -100,12 +100,12 @@
     }
   },
   "dependencies": {
-    "@electron/rebuild": "4.0.1",
+    "@electron/rebuild": "4.0.3",
     "clean-css": "5.3.3",
-    "electron": "^39.2.7",
+    "electron": "^40.0.0",
     "electron-builder": "^26.0.12",
     "mime-types": "^3.0.2",
-    "node-abi": "4.24.0",
+    "node-abi": "4.25.0",
     "node-json-minify": "3.0.0",
     "terser": "5.44.1"
   },
