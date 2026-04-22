@@ -24,10 +24,12 @@ modules:
       append-path: /usr/lib/sdk/node18/bin
       env:
         NPM_CONFIG_LOGLEVEL: info
-        npm_config_cache: /run/build/xdex-ui/flatpak-node/npm-cache
-        XDG_CACHE_HOME: /run/build/xdex-ui/flatpak-node/cache
+        npm_config_cache: /tmp/flatpak-node/npm-cache
+        XDG_CACHE_HOME: /tmp/flatpak-node/cache
         ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     build-commands:
+      - mkdir -p /tmp/flatpak-node/npm-cache /tmp/flatpak-node/cache
+
       # Install root dependencies
       - npm install --offline --legacy-peer-deps
       
