@@ -24,22 +24,16 @@ jobs:
         # https://github.com/electron/get#how-it-works
         path: ~/.cache/electron
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-    - name: Install system dependencies for x64->x32 cross-build
-      run: |
-        sudo apt update
-        sudo apt install libc6-dev-i386 gcc-multilib g++-multilib
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 14
-    - name: Setup npm
-      run: sudo npm i -g npm@7
+        node-version: 20
     - name: Install build deps
       run: npm install
     - name: Run prebuild script
       run: npm run prebuild-linux
-    - name: Build for x64 / ia32
-      run: ./node_modules/.bin/electron-builder build -l --x64 --ia32
+    - name: Build for x64
+      run: ./node_modules/.bin/electron-builder build -l --x64
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/upload-artifact@v4
@@ -48,7 +42,7 @@ jobs:
         path: dist/*.AppImage
         if-no-files-found: error
 
-  build-linux-arm32:
+  build-linux-armv7l:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -69,21 +63,20 @@ jobs:
       env:
         cache-name: cache-electron-bins
       with:
-        # cache location is described here:
-        # https://github.com/electron/get#how-it-works
         path: ~/.cache/electron
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Run prebuild outside of QEMU emulator
-      run: sudo npm i -g npm@7 && npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
-    - name: Build for arm32v7 (aka armv7l)
-      uses: docker://arm32v7/node:14-buster
-      with:
-        args: bash -c "npm i -g npm@7 && npm install && ./node_modules/.bin/electron-builder build -l --armv7l"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
+    - name: Build for armv7l
+      run: |
+        docker run --rm --platform linux/arm/v7 \
+          -e GH_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+          -v "$PWD":/work -w /work \
+          node:20-bullseye \
+          bash -lc "npm install --ignore-scripts && ./node_modules/.bin/electron-builder build -l --armv7l"
     - uses: actions/upload-artifact@v4
       with:
-        name: Linux-arm32-AppImage
+        name: Linux-armv7l-AppImage
         path: dist/*.AppImage
         if-no-files-found: error
 
@@ -100,7 +93,6 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        # npm cache files are stored in `~/.npm` on Linux/macOS
         path: ~/.npm
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Cache Electron binaries
@@ -108,18 +100,17 @@ jobs:
       env:
         cache-name: cache-electron-bins
       with:
-        # cache location is described here:
-        # https://github.com/electron/get#how-it-works
         path: ~/.cache/electron
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Run prebuild outside of QEMU emulator
-      run: sudo npm i -g npm@7 && npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
-    - name: Build for arm64 (aka arm64v8)
-      uses: docker://arm64v8/node:14-buster
-      with:
-        args: bash -c "npm i -g npm@7 && npm install && ./node_modules/.bin/electron-builder build -l --arm64"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npm install && rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && rm -rf node_modules
+    - name: Build for arm64
+      run: |
+        docker run --rm --platform linux/arm64 \
+          -e GH_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+          -v "$PWD":/work -w /work \
+          node:20-bullseye \
+          bash -lc "npm install --ignore-scripts && ./node_modules/.bin/electron-builder build -l --arm64"
     - uses: actions/upload-artifact@v4
       with:
         name: Linux-arm64-AppImage
@@ -130,29 +121,18 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Get npm cache directory
-      id: npm-cache
-      run: |
-        echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-    - uses: actions/cache@v4
-      with:
-        path: ${{ steps.npm-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
     - name: Cache Electron binaries
       uses: actions/cache@v4
       env:
         cache-name: cache-electron-bins
       with:
-        # cache location is described here:
-        # https://github.com/electron/get#how-it-works
         path: ~/AppData/Local/electron/Cache
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 14
-    - name: Setup npm
-      run: npm i -g npm@7
+        node-version: 20
+        cache: npm
     - name: npm install
       run: npm install
     - name: npm build
@@ -174,7 +154,6 @@ jobs:
       env:
         cache-name: cache-node-modules
       with:
-        # npm cache files are stored in `~/.npm` on Linux/macOS
         path: ~/.npm
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Cache Electron binaries
@@ -182,16 +161,12 @@ jobs:
       env:
         cache-name: cache-electron-bins
       with:
-        # cache location is described here:
-        # https://github.com/electron/get#how-it-works
         path: ~/Library/Caches/electron
         key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 14
-    - name: Setup npm
-      run: sudo npm i -g npm@7
+        node-version: 20
     - name: npm install
       run: npm install
     - name: npm build
