@@ -352,8 +352,11 @@ async function getDisplayName() {
         return user;
 
     try {
-        user = await require("username")();
-    } catch (e) { }
+        const { username } = require("username");
+        user = await username();
+    } catch (e) { 
+        console.error("Error getting username:", e);
+    }
 
     return user;
 }
@@ -408,6 +411,9 @@ async function initUI() {
         } else {
             greeter.innerHTML += "Welcome back";
         }
+    }).catch(err => {
+        console.error("Error in getDisplayName:", err);
+        greeter.innerHTML += "Welcome back";
     });
 
     greeter.setAttribute("style", "opacity: 1;");

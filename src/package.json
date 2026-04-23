@@ -40,7 +40,7 @@
     "smoothie": "1.36.1",
     "systeminformation": "^5.30.8",
     "tail": "^2.2.6",
-    "username": "5.1.0",
+    "username": "^6.0.0",
     "which": "2.0.2",
     "ws": "7.5.10",
     "xterm": "4.14.1",
