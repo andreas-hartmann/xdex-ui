@@ -352,7 +352,7 @@ async function getDisplayName() {
         return user;
 
     try {
-        user = await require("username")();
+        user = await require("username").username();
     } catch (e) { }
 
     return user;
@@ -363,7 +363,7 @@ async function initUI() {
     document.body.innerHTML += `<section class="mod_column" id="mod_column_left">
         <h3 class="title"><p>PANEL</p><p>SYSTEM</p></h3>
     </section>
-    <section id="main_shell" style="height:0%;width:0%;opacity:0;margin-bottom:30vh;" augmented-ui="bl-clip tr-clip exe">
+    <section id="main_shell" style="height:0%;width:0%;opacity:0;margin-bottom:30vh;" data-augmented-ui="bl-clip tr-clip border inlay exe">
         <h3 class="title" style="opacity:0;"><p>TERMINAL</p><p>MAIN SHELL</p></h3>
         <h1 id="main_shell_greeting"></h1>
     </section>

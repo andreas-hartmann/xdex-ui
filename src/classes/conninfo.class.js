@@ -16,7 +16,7 @@ class Conninfo {
 
         this.current = document.querySelector("#mod_conninfo_innercontainer > h1 > i");
         this.total = document.querySelector("#mod_conninfo_innercontainer > h2 > i");
-        this._pb = require("pretty-bytes");
+        this._pb = require("pretty-bytes").default;
 
         // Init Smoothie
         let TimeSeries = require("smoothie").TimeSeries;

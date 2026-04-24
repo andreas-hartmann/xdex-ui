@@ -72,7 +72,7 @@ class Terminal {
                 });
             }
 
-            let color = require("color");
+            let color = require("color").default;
             let colorify;
             if (doCustomFilter) {
                 colorify = (base, target) => {
@@ -98,6 +98,7 @@ class Terminal {
             let themeColor = `rgb(${window.theme.r}, ${window.theme.g}, ${window.theme.b})`;
 
             this.term = new this.xTerm({
+                allowProposedApi: true,
                 cols: 80,
                 rows: 24,
                 cursorBlink: window.theme.terminal.cursorBlink || true,

@@ -11,10 +11,10 @@ div.modal_popup {
     justify-content: center;
     cursor: default;
 
-    --aug-border: 0.2vh;
+    --aug-border-all: 0.2vh;
     --aug-border-bg: rgb(var(--color_r), var(--color_g), var(--color_b));
-    --aug-inset: 5px;
-    --aug-inset-bg: var(--color_light_black);
+    --aug-inlay-all: 5px;
+    --aug-inlay-bg: var(--color_light_black);
 }
 
 div.modal_popup.error {
@@ -32,7 +32,7 @@ div.modal_popup.warning {
     padding-bottom: 0.2vh;
 }
 div.modal_popup.info {
-    --aug-border: 0.2vh;
+    --aug-border-all: 0.2vh;
 }
 
 div.modal_popup.focus {
