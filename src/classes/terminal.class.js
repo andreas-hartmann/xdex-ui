@@ -72,7 +72,8 @@ class Terminal {
                 });
             }
 
-            let color = require("color");
+            const colorModule = require("color");
+            const color = colorModule.default || colorModule;
             let colorify;
             if (doCustomFilter) {
                 colorify = (base, target) => {
@@ -306,7 +307,8 @@ class Terminal {
         } else if (opts.role === "server") {
 
             this.Pty = require("node-pty");
-            this.Websocket = require("ws").Server;
+            const ws = require("ws");
+            this.Websocket = ws.WebSocketServer || ws.Server;
             this.Ipc = require("electron").ipcMain;
 
             this.renderer = null;

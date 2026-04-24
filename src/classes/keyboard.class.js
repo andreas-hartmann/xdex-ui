@@ -208,7 +208,6 @@ class Keyboard {
                     };
                 }
 
-                // See #229
                 key.onmouseleave = () => {
                     clearTimeout(key.holdTimeout);
                     clearInterval(key.holdInterval);
@@ -218,27 +217,26 @@ class Keyboard {
 
         // Tactile multi-touch support (#100)
         this.container.addEventListener("touchstart", e => {
-            e.preventDefault();
             for (let i = 0; i < e.changedTouches.length; i++) {
                 let key = e.changedTouches[i].target.parentElement;
-                if (key.tagName === 'svg') key = key.parentElement;
+                if (key.tagName === "svg") key = key.parentElement;
                 if (key.getAttribute("class").startsWith("keyboard_key")) {
-                    key.setAttribute("class", key.getAttribute("class")+" active");
+                    key.setAttribute("class", key.getAttribute("class") + " active");
                     key.onmousedown({preventDefault: () => {return true}});
                 } else {
                     key = e.changedTouches[i].target;
                     if (key.getAttribute("class").startsWith("keyboard_key")) {
-                        key.setAttribute("class", key.getAttribute("class")+" active");
                         key.onmousedown({preventDefault: () => {return true}});
                     }
                 }
             }
-        });
-        let dropKeyTouchHandler = e => {
             e.preventDefault();
+        });
+
+        const dropKeyTouchHandler = e => {
             for (let i = 0; i < e.changedTouches.length; i++) {
                 let key = e.changedTouches[i].target.parentElement;
-                if (key.tagName === 'svg') key = key.parentElement;
+                if (key.tagName === "svg") key = key.parentElement;
                 if (key.getAttribute("class").startsWith("keyboard_key")) {
                     key.setAttribute("class", key.getAttribute("class").replace("active", ""));
                     key.onmouseup({preventDefault: () => {return true}});

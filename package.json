@@ -14,7 +14,7 @@
   "main": "src/_boot.js",
   "scripts": {
     "start": "electron src --nointro",
-    "install-linux": "npm install && cd src && npm install && ../node_modules/.bin/electron-rebuild -f -w node-pty -v 41.2.2 && cd ..",
+    "install-linux": "npm install && cd src && npm install && ../node_modules/.bin/electron-rebuild -f -w node-pty -v 41.3.0 && cd ..",
     "preinstall-windows": "npm install --global --production windows-build-tools && npm install --global node-gyp && setx PYTHON \"%USERPROFILE%\\.windows-build-tools\\python27\\python.exe\"",
     "install-windows": "npm install && cd src && npm install && ..\\node_modules\\.bin\\electron-rebuild -f -w node-pty && cd ..",
     "prebuild-linux": "rsync -a --info=progress2 src/ prebuild-src --exclude node_modules && node prebuild-minify.js && cd prebuild-src && npm install",
@@ -99,14 +99,14 @@
     }
   },
   "dependencies": {
-    "@electron/rebuild": "4.0.3",
+    "@electron/rebuild": "4.0.4",
     "clean-css": "5.3.3",
-    "electron": "41.2.2",
+    "electron": "41.3.0",
     "electron-builder": "^26.0.12",
     "mime-types": "^3.0.2",
     "node-abi": "^4.28.0",
     "node-json-minify": "3.0.0",
-    "terser": "5.46.0"
+    "terser": "5.46.2"
   },
   "optionalDependencies": {
     "cson-parser": "4.0.9"
