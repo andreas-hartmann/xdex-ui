@@ -104,9 +104,9 @@
     "electron": "41.3.0",
     "electron-builder": "^26.0.12",
     "mime-types": "^3.0.2",
-    "node-abi": "^4.28.0",
+    "node-abi": "^4.31.0",
     "node-json-minify": "3.0.0",
-    "terser": "5.46.2"
+    "terser": "5.48.0"
   },
   "optionalDependencies": {
     "cson-parser": "4.0.9"
