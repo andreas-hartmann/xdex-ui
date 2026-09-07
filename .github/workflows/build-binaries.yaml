@@ -32,6 +32,8 @@ jobs:
       run: npm install
     - name: Run prebuild script
       run: npm run prebuild-linux
+    - name: Test application startup dependencies
+      run: npm --prefix prebuild-src test
     - name: Build for x64
       run: ./node_modules/.bin/electron-builder build -l --x64
       env:
