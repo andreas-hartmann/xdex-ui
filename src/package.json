@@ -12,6 +12,9 @@
     "terminal"
   ],
   "main": "_boot.js",
+  "scripts": {
+    "test": "node --test"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andreas-hartmann/xdex-ui"
