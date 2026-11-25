@@ -40,6 +40,7 @@ const path = require("path");
 const url = require("url");
 const fs = require("fs");
 const which = require("which");
+const getShellEnv = require("./shell-env.js");
 const Terminal = require("./classes/terminal.class.js").Terminal;
 
 ipc.on("log", (e, type, content) => {
@@ -279,7 +280,7 @@ app.on('ready', async () => {
     if (!require("fs").existsSync(settings.cwd)) throw new Error("Configured cwd path does not exist.");
 
     // See #366
-    let cleanEnv = await require("shell-env").shellEnv(settings.shell).catch(e => { throw e; });
+    let cleanEnv = await getShellEnv(settings.shell).catch(e => { throw e; });
 
     Object.assign(cleanEnv, {
         TERM: "xterm-256color",
